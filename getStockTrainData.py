@@ -180,10 +180,10 @@ def setFeatureData(stock_id):
 
                 #without column name
                 #trainingData.to_csv('bin/ParsedStock/'+str(stock_id)+'_trainingData.csv', index=False,header=False)
-                featureData.to_csv('./ParsedStock/'+str(stock_id)+'_featureData.csv', index=False)
+                featureData.to_csv('./ParsedStock/TrainingDataSet/'+str(stock_id)+'_featureData.csv', index=False)
 
             else:
-                raise ValueError("%s isn't a file!" % './ParsedStock/'+str(stock_id)+'/'+ADYear+'StockData/'+ADYear+'.csv')
+                raise ValueError("%s isn't a file!" % './ParsedStock/TrainingDataSet/'+str(stock_id)+'/'+ADYear+'StockData/'+ADYear+'.csv')
         
         #send featureData back to main function
         return featureData                
@@ -191,9 +191,9 @@ def setFeatureData(stock_id):
        
     
 #write pandas dataframe to csv file               
-def write2Csv(DataFrame,stock_id,ClfOrRg):
+def writeTrainingDataSet2Csv(DataFrame,stock_id,ClfOrRg):
     #store training data set to csv
-    DataFrame.to_csv('./ParsedStock/'+str(stock_id)+'_'+ClfOrRg+'_trainingDataSet.csv', index=False)
+    DataFrame.to_csv('./ParsedStock/TrainingDataSet/'+str(stock_id)+'_'+ClfOrRg+'_trainingDataSet.csv', index=False)
 
     
     
@@ -205,9 +205,10 @@ def setupTrainingDataSetFormat(trainingData):
     #get the number of records in trainingData
     numberOfRows=trainingData.shape[0]
     
-    #create empty pandas dataframe as a container for classifier and regressor usage
+    #create empty pandas dataframe as a container for classifier, rise regressor, and fall regressor usage
     clfTrainingDataSet = pandas.DataFrame()
-    rgTrainingDataSet = pandas.DataFrame()
+    rgRiseTrainingDataSet = pandas.DataFrame()
+    rgFallTrainingDataSet = pandas.DataFrame()
     
     #setup features and label them with the data of the past 3 days
     for row_index in range(0, numberOfRows-feature_days):
@@ -247,14 +248,25 @@ def setupTrainingDataSetFormat(trainingData):
         
         
        
-        #label the value of Price Fluctuation Limit.
-        aRecordOfTrainingData['RiseOrFall']=float(trainingData.loc[row_index+feature_days,'漲跌價差'])
+        #label the value with Price Fluctuation Limit.
+        priceFluctuationLimit=float(trainingData.loc[row_index+feature_days,'漲跌價差'])
+        aRecordOfTrainingData['RiseOrFall']=priceFluctuationLimit
         
-        #add a record of feature and label to rg trainingDataSet  
-        rgTrainingDataSet=pandas.concat([rgTrainingDataSet, aRecordOfTrainingData])
+        
+        
+        #if the Price Fluctuation Limit is positive, put this feature record to rise regressor training data set 
+        if (priceFluctuationLimit>0 ):
+            
+            #add a record of feature and label to rg trainingDataSet  
+            rgRiseTrainingDataSet=pandas.concat([rgRiseTrainingDataSet, aRecordOfTrainingData])
+        
+        #if the Price Fluctuation Limit is negative, put this feature record to fall regressor training data set
+        elif (priceFluctuationLimit<=0 ):
+            #add a record of feature and label to rg trainingDataSet  
+            rgFallTrainingDataSet=pandas.concat([rgFallTrainingDataSet, aRecordOfTrainingData])
+        
     
-    
-    return clfTrainingDataSet,rgTrainingDataSet
+    return clfTrainingDataSet,rgRiseTrainingDataSet,rgFallTrainingDataSet
 
 def main():
     
@@ -269,13 +281,17 @@ def main():
         #setup training data set
 
         
-        clfTrainingDataSet,rgTrainingDataSet=setupTrainingDataSetFormat(featureData)
+        clfTrainingDataSet,rgRiseTrainingDataSet,rgFallTrainingDataSet=setupTrainingDataSetFormat(featureData)
 
         #write pandas dataframe to csv file for clf usage 
-        write2Csv(clfTrainingDataSet,stock_id,'classifier')
+        writeTrainingDataSet2Csv(clfTrainingDataSet,stock_id,'classifier')
         
-        #write pandas dataframe to csv file for rg usage
-        write2Csv(rgTrainingDataSet,stock_id,'regressor')
+        #write pandas dataframe to csv file for rise rg usage
+        writeTrainingDataSet2Csv(rgRiseTrainingDataSet,stock_id,'riseRegressor')
+        
+        
+         #write pandas dataframe to csv file for fall rg usage
+        writeTrainingDataSet2Csv(rgFallTrainingDataSet,stock_id,'fallRegressor')
         
     
     
