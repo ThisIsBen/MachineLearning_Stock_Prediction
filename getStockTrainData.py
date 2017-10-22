@@ -7,25 +7,31 @@ import time, datetime,os,shutil
 from bs4 import BeautifulSoup
 import pandas
 
-dt = datetime.datetime.now()
-dt.year
-dt.month
-thisYear=2017
 
 
-
+##########Parameter area
 #id_list = ['2303','2330','1234','3006','2412'] #inout the stock IDs
 id_list = ['2331','2330'] 
-now = datetime.datetime.now()
 
-#year_list = range (2007,now.year+1) #since 2007 to this year
-year_list = range (thisYear,now.year+1) #since 2007 to this year
+now = datetime.datetime.now()
+thisYear=now.year
+
+#use the past 3 days' data to predict next day's stock
+feature_days=3
 
 #month_list = range(1,13)  # 12 months
 month_list = range(1,4)  # 1-9 month
 
+
+##########Parameter area
+
+
+#year_list = range (2007,now.year+1) #since 2007 to this year
+year_list = range (thisYear,now.year+1) #since 2007 to this year
+
 #Use Taiwan year to retrieve 3 major juristic person data
 juristicYear_list = range ((thisYear-1911),(now.year+1)-1911) #since 2007 to this year
+
 
 
 
@@ -199,8 +205,7 @@ def writeTrainingDataSet2Csv(DataFrame,stock_id,ClfOrRg):
     
 def setupTrainingDataSetFormat(trainingData):
     
-    #use the past 3 days' data to predict next day's stock
-    feature_days=3
+    
     
     #get the number of records in trainingData
     numberOfRows=trainingData.shape[0]
@@ -226,8 +231,11 @@ def setupTrainingDataSetFormat(trainingData):
         
          
         df_previousDay3 = trainingData.iloc[[row_index+2]]
-        df_previousDay3=df_previousDay3.reset_index(drop=True)
+        df_previousDay3=df_previousDay3.reset_index(drop=True)    
+        ######code modification area
         # if more past days' data is required, add more  df_previousDay3 = pd.DataFrame(trainingData.iloc[row_index+n]) below 
+        ######code modification area
+        
         
         
         aRecordOfTrainingData=pandas.concat([df_previousDay1,df_previousDay2,df_previousDay3], axis=1)
