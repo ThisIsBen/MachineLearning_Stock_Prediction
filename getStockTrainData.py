@@ -11,7 +11,7 @@ import pandas
 
 ##########Parameter area
 #id_list = ['2303','2330','1234','3006','2412'] #inout the stock IDs
-id_list = ['2331','2330'] 
+id_list = ['2317','2330'] 
 
 now = datetime.datetime.now()
 thisYear=now.year
@@ -20,7 +20,7 @@ thisYear=now.year
 feature_days=3
 
 #month_list = range(1,13)  # 12 months
-month_list = range(1,4)  # 1-9 month
+month_list = range(1,10)  # 1-9 month
 
 
 ##########Parameter area
@@ -180,6 +180,9 @@ def setFeatureData(stock_id):
                 stockData = pandas.read_csv(stockDataFilePath)
 
                 stockData=stockData.iloc[:,3:8]
+                
+                #use the code below instead, if you want to view the date of each datum
+                #stockData=stockData.iloc[:,0:8]
 
                 featureData = pandas.concat([stockData,accumulateJuristic ], axis=1)
                 #store to training data csv
@@ -245,6 +248,10 @@ def setupTrainingDataSetFormat(trainingData):
         
         #the default value of BoomOrBust is set to 0,which means Bust
         aRecordOfTrainingData['RiseOrFall']=0
+        
+        #avoid strange str that can't be converted to float
+        if(trainingData.loc[row_index+feature_days,'漲跌價差']=='X0.00'):
+            trainingData.loc[row_index+feature_days,'漲跌價差']='0'
         
         
         #label 1 if it's Boom
