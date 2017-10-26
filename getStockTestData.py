@@ -22,14 +22,14 @@ feature_days=3
 
 ######parameter area
 
-#set this program be executed automatically at 14:00 every day
-######set this program be executed at 14:00 the next day
+#set this program be executed automatically at 16:30 every day
+######set this program be executed at 16:30 the next day
 x=datetime.datetime.today()
-y=x.replace(day=x.day+1, hour=14, minute=0, second=0, microsecond=0)
+y=x.replace(day=x.day+1, hour=16, minute=30, second=0, microsecond=0)
 delta_t=y-x
 
 secs=delta_t.seconds+1
-######set this program be executed at 14:00 the next day
+######set this program be executed at 16:30 the next day
 
 
 
@@ -217,9 +217,7 @@ def setupTestingDataSetFormat(testingData):
    
     
     
-    #get the number of records in trainingData
-    numberOfRows=feature_days
-    
+   
     #create empty pandas dataframe as a container for testing data set
     testingDataSet = pandas.DataFrame()
   
@@ -228,13 +226,15 @@ def setupTestingDataSetFormat(testingData):
 
     
     #setup features and label them with the data of the past feature_days days
-    for row_index in range( 0,numberOfRows):
+    for row_index in range( 0,feature_days):
         
         
         
         #get the stock data of the previous feature_days days and reset their index to merge them in the same row in later merge process.
         df_previousDay = testingData.iloc[[row_index]]
         df_previousDay=df_previousDay.reset_index(drop=True)
+        daysBefore=str(feature_days-row_index)
+        df_previousDay.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
 
         testingDataSet=pandas.concat([testingDataSet,df_previousDay], axis=1)
    
@@ -275,7 +275,8 @@ def buildTestingDataSet():
             
             
           
-        #restart timer again to at 14:00 the next day 
+        #restart timer again to at 16:30 the next day 
+        #/#
         everyDayExecuter = Timer(secs, buildTestingDataSet)
         everyDayExecuter.start()
     
@@ -287,7 +288,8 @@ def main():
  
     
     
-    #start the timer to run program at 14:00 every day,after it stops, restart it in the buildTestingDataSet function
+    #start the timer to run program at 16:30 every day,after it stops, restart it in the buildTestingDataSet function
+    #/#
     everyDayExecuter = Timer(secs, buildTestingDataSet)#A threading.Timer executes a function once. 
     everyDayExecuter.start()
      
