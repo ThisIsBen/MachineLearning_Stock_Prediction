@@ -19,17 +19,20 @@ id_list = ['2317','2330']
 #use the past 3 days' data to predict next day's stock
 feature_days=3
     
-
+#without 'RiseOrFall'
+list_colName=[u'3天前開盤價',u'3天前最高價',u'3天前最低價',u'3天前收盤價',u'3天前漲跌價差',u'3天前投信',u'3天前自營商',u'3天前外資',u'2天前開盤價',u'2天前最高價',u'2天前最低價',u'2天前收盤價',u'2天前漲跌價差',u'2天前投信',u'2天前自營商',u'2天前外資',u'1天前開盤價',u'1天前最高價',u'1天前最低價',u'1天前收盤價',u'1天前漲跌價差',u'1天前投信',u'1天前自營商',u'1天前外資']
 ######parameter area
 
-#set this program be executed automatically at 16:30 every day
-######set this program be executed at 16:30 the next day
+#set this program be executed automatically at 17:00 every day
+######set this program be executed at 17:00 the next day
+'''
 x=datetime.datetime.today()
-y=x.replace(day=x.day+1, hour=16, minute=30, second=0, microsecond=0)
+y=x.replace(day=x.day+1, hour=17, minute=0, second=0, microsecond=0)
 delta_t=y-x
 
 secs=delta_t.seconds+1
-######set this program be executed at 16:30 the next day
+'''
+######set this program be executed at 17:00 the next day
 
 
 
@@ -245,6 +248,29 @@ def setupTestingDataSetFormat(testingData):
     
     
     return testingDataSet
+def  rearrange2SVMFormat(testingDataSet):
+        #get num of cols
+        numOfCol=len(testingDataSet.columns)
+        #rearrange to libSVM training data format
+        for index, row in testingDataSet.iterrows():
+
+            for colNo in range(0,numOfCol):
+                testingDataSet.loc[index,list_colName[colNo]]=str(colNo+1)+':'+str( testingDataSet.loc[index,list_colName[colNo]])
+        
+        #insert the unknown RiseOrFall col to testing data set
+        new_col = [0]  # can be a list, a Series, an array or a scalar   
+        testingDataSet.insert(0, column='RiseOrFall', value=new_col)
+        return testingDataSet
+    
+#write pandas dataframe to csv file               
+def writeSVMFormat2Csv(DataFrame,stock_id,testingDataFilename):
+    #store training data set to csv
+   
+    testingDataDirectory='./ParsedStock/TestingDataSet/LIBSVM'+str(stock_id)+'_testingDataSet'
+    if not os.path.exists(testingDataDirectory):
+        os.makedirs(testingDataDirectory)
+    #store training data set to csv
+    DataFrame.to_csv(testingDataDirectory+'/'+str(stock_id)+'_'+testingDataFilename+'.csv', index=False, sep=" ",header=False)
 
 def buildTestingDataSet():
         #update date time info every day
@@ -274,24 +300,31 @@ def buildTestingDataSet():
             writeTestingDataSet2csv(testingDataSet,stock_id,testingDataFilename)
             
             
+            
+            #Generate SVM testing Data format
+            #rearrange dataframe to libSVM testing data format
+            testingDataSet=rearrange2SVMFormat(testingDataSet)
+            
+            #write to csv and replace comma with space
+            writeSVMFormat2Csv(testingDataSet,stock_id,testingDataFilename)
           
         #restart timer again to at 16:30 the next day 
         #/#
-        everyDayExecuter = Timer(secs, buildTestingDataSet)
-        everyDayExecuter.start()
+        #everyDayExecuter = Timer(secs, buildTestingDataSet)
+        #everyDayExecuter.start()
     
 
 
 def main():
-    #buildTestingDataSet()
+    buildTestingDataSet()
      
  
     
     
     #start the timer to run program at 16:30 every day,after it stops, restart it in the buildTestingDataSet function
     #/#
-    everyDayExecuter = Timer(secs, buildTestingDataSet)#A threading.Timer executes a function once. 
-    everyDayExecuter.start()
+    #everyDayExecuter = Timer(secs, buildTestingDataSet)#A threading.Timer executes a function once. 
+    #everyDayExecuter.start()
      
     
 if __name__ == "__main__":

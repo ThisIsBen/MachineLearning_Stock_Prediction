@@ -6,6 +6,8 @@ import pickle
 import pandas
 import sys
 import json
+import os
+
 #####parameter area
 
 #stock_id that will be predicted
@@ -40,8 +42,42 @@ def predict_with_RF_CLF(testingDataSet,stock_id):
     testingDataSet_y_riseOrFall_pred = RF_CLF_ReloadModel.predict(testingDataSet)
     print (' RF_CLF Prediction of today\'s '+stock_id+' testing data set: {}'.format(testingDataSet_y_riseOrFall_pred))
 
-    return testingDataSet_y_riseOrFall_pred
+    return testingDataSet_y_riseOrFall_pred[0]
 
+#get LIBSVM result
+def predict_with_LIBSVM(startDate,stock_id):
+
+   
+    #scale LIBSVM testing data
+    os.system("svm-scale -r scale ParsedStock/TestingDataSet/LIBSVM"+stock_id+"_testingDataSet/"+stock_id+"_"+startDate+".csv > LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale")
+    
+    #ParsedStock/TestingDataSet/LIBSVM2317_testingDataSet/2317_2017-11-1.csv
+    
+    
+ 
+    #predict LIBSVM testing data
+    os.system("svm-predict LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale TrainedModel/LIBSVM_Model/LIBSVM"+stock_id+"CLF_Train.scale.model LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt")
+    
+    #read in the LIBSVM prediction result
+    with open("LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt") as f:
+        LIBSVMPredictResult = f.readlines()
+    # you may also want to remove whitespace characters like `\n` at the end of each line
+    LIBSVMPredictResult = [x.strip() for x in LIBSVMPredictResult]
+    
+    #return the LIBSVM prediction result of the input startDate
+    return int(LIBSVMPredictResult[0])
+    
+    '''
+    # load the corresponding RF_CLF model
+    f = open('./TrainedModel/'+str(stock_id)+'_RF_Clf_model.pkl', 'rb')
+    RF_CLF_ReloadModel = pickle.load(f)
+
+    #use the testing data set to predict today's stock rise or fall
+    testingDataSet_y_riseOrFall_pred = RF_CLF_ReloadModel.predict(testingDataSet)
+    print (' RF_CLF Prediction of today\'s '+stock_id+' testing data set: {}'.format(testingDataSet_y_riseOrFall_pred))
+
+    return testingDataSet_y_riseOrFall_pred[0]
+    '''
 
 def predicti_rise_extent_with_LIN_RG(testingDataSet,stock_id):
 
@@ -107,10 +143,20 @@ def main():
             #load testing data set
             testingDataSet,testingDataframe=loadTestingDataSet(startDate,stock_id)
 
-            #predict rise or fall by clf
-            riseOrFall=predict_with_RF_CLF(testingDataSet,stock_id)
+            
+            ###############SKLearn VS LIBSVM
+            #predict rise or fall with clf
+            #riseOrFall=predict_with_RF_CLF(testingDataSet,stock_id)
+            
+            
+            
+            #predict rise or fall with LIBSVM
+            riseOrFall=predict_with_LIBSVM(startDate,stock_id)
+            
+            ################SKLearn VS LIBSVM
+            
 
-           
+            print(riseOrFall)
         
         
         
