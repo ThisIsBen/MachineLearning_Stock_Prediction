@@ -13,9 +13,16 @@ import pandas
 
 #########parameter area
 #id_list = ['2303','2330','1234','3006','2412'] #inout the stock IDs
-id_list = ['2317','2330'] #inout the stock IDs
+#id_list = ['2317','2330'] #inout the stock IDs
+id_list = ['2317','2330','2885']
 #use the past 3 days' data to predict next day's stock
 feature_days=3
+
+#/#with 成交量
+#list_colName=[u'3天前成交金額',u'3天前開盤價',u'3天前最高價',u'3天前最低價',u'3天前收盤價',u'3天前漲跌價差',u'3天前成交筆數',u'3天前投信',u'3天前自營商',u'3天前外資',u'2天前成交金額',u'2天前開盤價',u'2天前最高價',u'2天前最低價',u'2天前收盤價',u'2天前漲跌價差',u'2天前成交筆數',u'2天前投信',u'2天前自營商',u'2天前外資',u'1天前成交金額',u'1天前開盤價',u'1天前最高價',u'1天前最低價',u'1天前收盤價',u'1天前漲跌價差',u'1天前成交筆數',u'1天前投信',u'1天前自營商',u'1天前外資','RiseOrFall']
+
+
+#/#without 成交量
 list_colName=[u'3天前開盤價',u'3天前最高價',u'3天前最低價',u'3天前收盤價',u'3天前漲跌價差',u'3天前投信',u'3天前自營商',u'3天前外資',u'2天前開盤價',u'2天前最高價',u'2天前最低價',u'2天前收盤價',u'2天前漲跌價差',u'2天前投信',u'2天前自營商',u'2天前外資',u'1天前開盤價',u'1天前最高價',u'1天前最低價',u'1天前收盤價',u'1天前漲跌價差',u'1天前投信',u'1天前自營商',u'1天前外資','RiseOrFall']
 
 list_trainingSetType=['classifier','riseRegressor','fallRegressor']

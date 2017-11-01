@@ -7,15 +7,20 @@ import pandas
 import sys
 import json
 import os
-
+from decimal import Decimal, getcontext
 #####parameter area
 
 #stock_id that will be predicted
-id_list = ['2317','2330'] 
-weight=4/len(id_list)
+id_list = ['2317','2330','2885'] 
+weight=int(4/len(id_list))
 life=3
+
+#make LIBSVM model switchable
+dict_LIBSVM_Model={'noTradVol':'CLF_Train.scale.model','withTradVol':'CLF_TrainTradVol.scale.model'}
 #create a dict to store 停利點 for each company:
 #stopLossPointDict= {'2330_riseStopLossPoint': 1, '2330_fallStopLossPoint': -0.5, '2317_riseStopLossPoint':0.5,'2317_fallStopLossPoint': -0.5}
+
+dict_stop_loss_point={'2330':0.5,'2317':0.5,'2885':0.05}
 #####parameter area
 
 
@@ -56,7 +61,7 @@ def predict_with_LIBSVM(startDate,stock_id):
     
  
     #predict LIBSVM testing data
-    os.system("svm-predict LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale TrainedModel/LIBSVM_Model/LIBSVM"+stock_id+"CLF_Train.scale.model LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt")
+    os.system("svm-predict LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale TrainedModel/LIBSVM_Model/LIBSVM"+stock_id+dict_LIBSVM_Model['noTradVol']+" LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt")
     
     #read in the LIBSVM prediction result
     with open("LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt") as f:
@@ -198,11 +203,13 @@ def main():
 
 
 
-
-
-                #planA 
-                ###set close_low_price = 前日收盤價+(-0.5)
-                dict_eachCompanyStockPrediction['close_low_price']=previousDayClosePrice+(-0.5)
+                #displayed precision 
+                getcontext().prec = 5
+                
+                
+                 ###set close_low_price = 前日收盤價+(-0.5)
+                dict_eachCompanyStockPrediction['close_low_price']=float(Decimal(previousDayClosePrice)-Decimal(dict_stop_loss_point[stock_id]))
+                                                                         
 
 
                 #planB
@@ -227,9 +234,9 @@ def main():
 
 
 
-                #planA 
-                ###set close_high_price = 前日收盤價+0.5
-                dict_eachCompanyStockPrediction['close_high_price']=previousDayClosePrice+0.5
+               
+                    ###set close_high_price = 前日收盤價+0.5
+                dict_eachCompanyStockPrediction['close_high_price']=float(Decimal(previousDayClosePrice)+                               Decimal(dict_stop_loss_point[stock_id]))
 
                 #planB
                 #set close_high_price = 前日收盤價+[stock_id]riseStopLossPoint

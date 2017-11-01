@@ -11,26 +11,34 @@ import pandas
 
 ##########Parameter area
 #id_list = ['2303','2330','1234','3006','2412'] #inout the stock IDs
-id_list = ['2317','2330'] 
+id_list = ['2317','2330','2885'] 
 
 now = datetime.datetime.now()
-thisYear=now.year
+#/#
+thisYear=2016
+#/#
+#year_list = range (2007,now.year+1) #since 2007 to this year
+#year_list = range (thisYear,now.year+1) #since 2007 to this year
+year_list = range (thisYear,now.year) #get 2016 data
+
+
+#/#
+#Use Taiwan year to retrieve 3 major juristic person data
+#juristicYear_list = range ((thisYear-1911),(now.year+1)-1911) #since 2007 to this year
+juristicYear_list = range ((thisYear-1911),(now.year)-1911) #get 2016 data
+
+
 
 #use the past 3 days' data to predict next day's stock
 feature_days=3
 
-#month_list = range(1,13)  # 12 months
-month_list = range(1,10)  # 1-9 month
+#/#
+month_list = range(1,13)  # 12 months
+#month_list = range(1,11)  # 1-10 month
 
 
 ##########Parameter area
 
-
-#year_list = range (2007,now.year+1) #since 2007 to this year
-year_list = range (thisYear,now.year+1) #since 2007 to this year
-
-#Use Taiwan year to retrieve 3 major juristic person data
-juristicYear_list = range ((thisYear-1911),(now.year+1)-1911) #since 2007 to this year
 
 
 
@@ -146,6 +154,9 @@ def setFeatureData(stock_id):
    
         #set up empty pandas dataframe as container
         accumulateJuristic = pandas.DataFrame()
+        
+        #set up empty pandas dataframe as container for trading volume
+        tradingVolume = pandas.DataFrame()
         for year in juristicYear_list:
             ADYear=str(year+1911)
             for month in month_list:
@@ -168,8 +179,57 @@ def setFeatureData(stock_id):
                 accumulateJuristic=pandas.concat([accumulateJuristic, juristicPerson])
             accumulateJuristic.columns=[u'投信',u'自營商',u'外資']
             accumulateJuristic=accumulateJuristic.reset_index(drop=True)
+            '''
+            if(stock_id=='2885'):
+                firstMonth=True
+                accumulate_dict = {}
+                
+                #parse trading volume for stock trading company
+                for month in month_list:
+                    
+                    date = str (ADYear) + "{0:0=2d}".format(month) +'01' ## format is yyyymmdd
+                    url_tradingVolume= 'http://www.twse.com.tw/exchangeReport/FMTQIK?response=json&date='+date
+                    #print(url)
+                    
+                    res =requests.post(url_tradingVolume,)
+                    soup = BeautifulSoup(res.text , 'html.parser')
+                    smt = json.loads(soup.text)     #convert data into json
+                    
+                    print(smt)
+                    #dfs=pandas.read_html(url)
+                    if(firstMonth):
+                        accumulate_dict.update(smt)
+                        firstMonth=False
+                    #print(accumulate_dict)
+                    else:
+                        accumulate_dict['data'].extend(smt['data'][])
+
+    
+                   
+                    juristicPerson=dfs[0]
+
+                    juristicPerson=juristicPerson.iloc[:,1:]
+                    juristicPerson=juristicPerson.drop(juristicPerson.index[[0,1]])
+                    juristicPerson = juristicPerson.iloc[::-1]
+
+                    #trim needless features
+                    juristicPerson=juristicPerson.iloc[:,2:4]
 
 
+
+
+
+
+
+                    tradingVolume=pandas.concat([tradingVolume, juristicPerson])
+                tradingVolume.columns=[u'成交金額',u'成交筆數']
+                tradingVolume=tradingVolume.reset_index(drop=True)
+               '''
+
+            
+            
+            
+            
             # read stock data of the current iterated company 
             stockDataFilePath='./ParsedStock/'+str(stock_id)+'/'+ADYear+'StockData/'+ADYear+'.csv'
             #while not os.path.exists(stockDataFilePath):
@@ -179,14 +239,18 @@ def setFeatureData(stock_id):
                 # read stock data of the current iterated company 
                 stockData = pandas.read_csv(stockDataFilePath)
 
-                stockData=stockData.iloc[:,3:8]
+                stockData=stockData.iloc[:,2:9]
                 
                 #use the code below instead, if you want to view the date of each datum
                 #stockData=stockData.iloc[:,0:8]
 
                 featureData = pandas.concat([stockData,accumulateJuristic ], axis=1)
                 #store to training data csv
-
+                '''
+                #add trading volume
+                if(stock_id=='2885'):
+                    featureData = pandas.concat([featureData,tradingVolume ], axis=1)
+                '''
                 #without column name
                 #trainingData.to_csv('bin/ParsedStock/'+str(stock_id)+'_trainingData.csv', index=False,header=False)
                 featureData.to_csv('./ParsedStock/TrainingDataSet/'+str(stock_id)+'_featureData.csv', index=False)
@@ -196,7 +260,7 @@ def setFeatureData(stock_id):
         
         #send featureData back to main function
         return featureData                
-        
+          
        
     
 #write pandas dataframe to csv file               
@@ -218,23 +282,52 @@ def setupTrainingDataSetFormat(trainingData):
     rgRiseTrainingDataSet = pandas.DataFrame()
     rgFallTrainingDataSet = pandas.DataFrame()
     
+  
     #setup features and label them with the data of the past 3 days
     for row_index in range(0, numberOfRows-feature_days):
         
+        #to generate column names e.g.,n天前開盤價
+        daysBefore=feature_days
         
         
         #get the stock data of the previous 3 days and reset their index to merge them in the same row in later merge process.
-        df_previousDay1 = trainingData.iloc[[row_index]]
+        #由上而下 順序為 久到近
+        #if(df_previousDay1.loc[0,'收盤價']=='--'):
+        daysBefore=str(daysBefore) 
+        df_previousDay1 = trainingData.iloc[[row_index]]       
         df_previousDay1=df_previousDay1.reset_index(drop=True)
-
         
+        #/#with 成交量      
+        #df_previousDay1.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']      
+          
+         #/#without 成交量      
+        df_previousDay1.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
+
+        daysBefore=int(daysBefore)
+        daysBefore-=1
+        daysBefore=str(daysBefore)
         df_previousDay2 = trainingData.iloc[[row_index+1]]
         df_previousDay2=df_previousDay2.reset_index(drop=True)
         
-        
+        #/# with 成交量 
+        #df_previousDay2.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
          
+        #/#without 成交量      
+        df_previousDay1.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
+        
+        
+        daysBefore=int(daysBefore)
+        daysBefore-=1
+        daysBefore=str(daysBefore)
         df_previousDay3 = trainingData.iloc[[row_index+2]]
-        df_previousDay3=df_previousDay3.reset_index(drop=True)    
+        df_previousDay3=df_previousDay3.reset_index(drop=True) 
+        
+        #/# with 成交量 
+        #df_previousDay3.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']        
+         
+         #/#without 成交量 
+        df_previousDay1.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
+        
         ######code modification area
         # if more past days' data is required, add more  df_previousDay3 = pd.DataFrame(trainingData.iloc[row_index+n]) below 
         ######code modification area
@@ -285,17 +378,18 @@ def setupTrainingDataSetFormat(trainingData):
 
 def main():
     
-    #get stock data and store it as csv 
-    getStockData()
+    #/#get stock data and store it as csv 
+    #getStockData()
     
     for stock_id in id_list:
-        #setup all the features
-        featureData=setFeatureData(stock_id)
-
-
-        #setup training data set
-
+        #/#setup all the features
+        #featureData=setFeatureData(stock_id)
+       
         
+        featureData=pandas.read_csv('./ParsedStock/TrainingDataSet/'+str(stock_id)+'_featureData.csv') #2017 only
+        #setup training data set
+        
+      
         clfTrainingDataSet,rgRiseTrainingDataSet,rgFallTrainingDataSet=setupTrainingDataSetFormat(featureData)
 
         #write pandas dataframe to csv file for clf usage 
@@ -307,7 +401,7 @@ def main():
         
          #write pandas dataframe to csv file for fall rg usage
         writeTrainingDataSet2Csv(rgFallTrainingDataSet,stock_id,'fallRegressor')
-        
+       
     
     
     
