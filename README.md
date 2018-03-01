@@ -35,7 +35,7 @@ Regressor and 跌幅 Regressor can accept.**
     January to December to the format that 漲幅 Regressor and 跌幅
     Regressor can accept.
 
--   Id\_list(e.g., [‘2331’,’2330’]) : to put the stock numbers here if
+-   Id\_list(e.g., ['2331','2330']) : to put the stock numbers here if
     you want to convert their stock history data to the format that 漲幅
     Regressor and 跌幅 Regressor can accept.
 ```
@@ -46,7 +46,7 @@ Step 2 to the format that LIBSVM can accept.**
 
 **Parameters that you can modify :**
 
--   Id\_list(e.g., [‘2331’,’2330’]) : to put the stock numbers here if
+-   Id\_list(e.g., ['2331','2330']) : to put the stock numbers here if
     you want to convert their stock history data to the format that
     LIBSVM can accept.
 ```
@@ -57,7 +57,7 @@ stock number specified in the getStockTestData.py every day**
 
 **Parameters that you can modify :**
 
--   Id\_list(e.g., [‘2331’,’2330’]) : to put the stock numbers here if
+-   Id\_list(e.g., ['2331','2330']) : to put the stock numbers here if
     you want to parse their stock data every day after the stock market
     trade ends.
 ```
@@ -67,7 +67,7 @@ python3 getStockTestData.py
 
 **Parameters that you can modify :**
 
--   Id\_list(e.g., [‘2331’,’2330’]) : to put the stock numbers here if
+-   Id\_list(e.g., ['2331','2330']) : to put the stock numbers here if
     you want to train **漲幅 Regressor and 跌幅 Regressor with** their
     stock history data.
 ```
@@ -88,7 +88,7 @@ stock market trade ends)**
 
 **Parameters that you can modify in predictStock.py:**
 
--   Id\_list(e.g., [‘2331’,’2330’]) : to put the stock numbers here if
+-   Id\_list(e.g., ['2331','2330']) : to put the stock numbers here if
     you want to predict their tomorrow stock performance(You must put
     all these stock number in the id\_list of the previous steps to
     achieve the prediction.).
