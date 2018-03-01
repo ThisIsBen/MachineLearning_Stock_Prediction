@@ -80,7 +80,7 @@ Refer to the manual of
 [*LIBSVM*](https://www.csie.ntu.edu.tw/~cjlin/libsvm/).
 
 After finishing training, please put the model file (.scale) in the
-LIBSVMTestResult folder.
+"LIBSVMTestResult" folder.
 
 **Step 7, Open another terminal to execute the stock prediction for
 tomorrow and get the prediction result(this should be done after today’s
