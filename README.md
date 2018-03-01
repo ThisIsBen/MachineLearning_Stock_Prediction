@@ -1,5 +1,4 @@
 # MachineLearning_Stock_Prediction
-Q36064010 陳昭成 Stock Prediction Supplementary Report
 ------------------------------------------------------
 
 我在股票預測上專注於研究鴻海與台積電的股票預測，因此，我為這兩間公司打造其專屬的Model來做其專屬的股票預測。
