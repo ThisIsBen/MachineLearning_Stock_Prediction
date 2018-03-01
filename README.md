@@ -6,7 +6,7 @@
 我為這兩間公司分別訓練了三個models，分別為: 漲跌Classifier, 漲幅
 Regressor, 跌幅 Regressor
 
-#Program execution steps:
+# Program execution steps:
 
 **Steps 1, Parse the desired stock history data from 台灣證券交易所**
 
