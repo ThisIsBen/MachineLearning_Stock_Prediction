@@ -7,7 +7,7 @@
 Regressor, 跌幅 Regressor
 
 #Program execution steps:
-**All the program are stored in "bin" folder.
+
 **Steps 1, Parse the desired stock history data from 台灣證券交易所**
 
 **Parameters that you can modify :**
