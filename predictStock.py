@@ -119,7 +119,7 @@ def predicti_fall_extent_with_LIN_RG(testingDataSet,stock_id):
 ###output decision file to commit folder
 def outputDecisionFile(list_overallStockPredictionResult,startDate,endDate):
     print('Decision file content: {}'.format(list_overallStockPredictionResult))
-    with open('../commit/'+startDate+'_'+endDate+'.json', 'w') as f:
+    with open('./commit/'+startDate+'_'+endDate+'.json', 'w') as f:
         json.dump(list_overallStockPredictionResult, f, indent=4)
 
 
