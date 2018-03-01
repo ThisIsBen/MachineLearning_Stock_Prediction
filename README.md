@@ -95,7 +95,7 @@ stock market trade ends)**
 sh run.sh
 ```
 **Output Format:**
-
+The prediction result will be stored in JSON file in the "commit" folder with file name "[date]_[date].json"
 <img src="./media/image1.png" width="262" height="314" />
 
 ### Model 介紹:
