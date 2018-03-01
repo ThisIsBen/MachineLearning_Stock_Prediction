@@ -11,7 +11,8 @@ from decimal import Decimal, getcontext
 #####parameter area
 
 #stock_id that will be predicted
-id_list = ['2317','2330','2885'] 
+id_list = ['2317','2330'] 
+#id_list = ['2330','2885'] 
 weight=int(4/len(id_list))
 life=3
 
@@ -61,7 +62,7 @@ def predict_with_LIBSVM(startDate,stock_id):
     
  
     #predict LIBSVM testing data
-    os.system("svm-predict LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale TrainedModel/LIBSVM_Model/LIBSVM"+stock_id+dict_LIBSVM_Model['noTradVol']+" LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt")
+    os.system("svm-predict LIBSVMTestResult/"+stock_id+"_"+startDate+"Test.scale TrainedModel/LIBSVM_Model/LIBSVM"+stock_id+dict_LIBSVM_Model['withTradVol']+" LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt")
     
     #read in the LIBSVM prediction result
     with open("LIBSVMTestResult/"+stock_id+"_LIBSVMResult/"+stock_id+"_"+startDate+"TestResult.txt") as f:

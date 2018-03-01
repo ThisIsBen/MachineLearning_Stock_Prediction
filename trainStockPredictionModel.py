@@ -19,7 +19,7 @@ from sklearn.svm import SVR
 feature_days=3
 current_features_per_day=8
 totalFeatureForOneRecord=feature_days*current_features_per_day
-id_list = ['2317','2330'] 
+id_list = ['2317','2330','2885'] 
 
 Rise_Linear_RG_Model_Polynomial_Features_degree=1
 Fall_Linear_RG_Model_Polynomial_Features_degree=1
