@@ -1,0 +1,20 @@
+[
+    {
+        "type": "short",
+        "open_price": 104.0,
+        "weight": 2,
+        "close_low_price": 102.94491960654334,
+        "life": 3,
+        "close_high_price": 104.5,
+        "code": "2317"
+    },
+    {
+        "type": "short",
+        "open_price": 242.0,
+        "weight": 2,
+        "close_low_price": 240.77415426341628,
+        "life": 3,
+        "close_high_price": 242.5,
+        "code": "2330"
+    }
+]

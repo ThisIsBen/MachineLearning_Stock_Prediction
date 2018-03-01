@@ -1,0 +1,29 @@
+[
+    {
+        "type": "short",
+        "open_price": 112.0,
+        "code": "2317",
+        "close_high_price": 112.5,
+        "weight": 1,
+        "life": 3,
+        "close_low_price": 111.1412158396318
+    },
+    {
+        "type": "short",
+        "open_price": 242.5,
+        "code": "2330",
+        "close_high_price": 243.0,
+        "weight": 1,
+        "life": 3,
+        "close_low_price": 241.25614368312233
+    },
+    {
+        "type": "buy",
+        "open_price": 13.45,
+        "code": "2885",
+        "close_high_price": 13.600376606856447,
+        "weight": 1,
+        "life": 3,
+        "close_low_price": 13.4
+    }
+]
