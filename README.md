@@ -88,6 +88,10 @@ Step2 Run the following command on CMD
 ```
 svm-train -s 0 -c 100 -g 0.1 -v 5 LIBSVM2020CLF_trainingDataSet.scale
 ```
+Do five-fold cross validation for the classifier using
+the parameters C = 100 and gamma = 0.1
+
+
 Step3 A model file (.model) file will be created.
 e.g.,
 LIBSVM2020CLF_trainingDataSet.scale.model
