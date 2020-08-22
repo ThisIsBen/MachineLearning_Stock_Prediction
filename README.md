@@ -89,6 +89,10 @@ Step6-4 Run the following command on CMD
 ```
 svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_Train.scale
 ```
+A .scale file will be created 
+**The name of the .scale file must end up with 'CLF_Train'**
+
+
 Step6-5 Run the following command on CMD
 ```
 svm-train -s 0 -c 5 -t 2 -g 0.5 -e 0.1 LIBSVM2020CLF_Train.scale
