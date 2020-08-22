@@ -121,7 +121,7 @@ stock market trade ends)**
     all these stock number in the id\_list of the previous steps to
     achieve the prediction.).
 ```
-sh run.sh [today's date] [today's date]
+python3 predictStock.py [today's date] [today's date]
 ```
 e.g.,
 ```
