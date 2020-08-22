@@ -87,11 +87,11 @@ Stop6-3 Change directory to the 'windows' folder in the LIBSVM folder
 
 Step6-4 Run the following command on CMD
 ```
-svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_trainingDataSet.scale
+svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_Train.scale
 ```
 Step6-5 Run the following command on CMD
 ```
-svm-train -s 0 -c 5 -t 2 -g 0.5 -e 0.1 LIBSVM2020CLF_trainingDataSet.scale
+svm-train -s 0 -c 5 -t 2 -g 0.5 -e 0.1 LIBSVM2020CLF_Train.scale
 ```
 Train a classifier with RBF kernel exp(-0.5|u-v|^2), C=10, and
 stopping tolerance 0.1.
