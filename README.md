@@ -78,13 +78,18 @@ LIBSVM.**
 Refer to the manual of
 [*LIBSVM*](https://www.csie.ntu.edu.tw/~cjlin/libsvm/).
 
-e.g.,
-Step0 Open CMD on Windows
-Step1 Run the following command on CMD
+For exmaple,
+Step6-1 Download LIBSVM folder from the link above
+
+Step6-2 Open CMD on Windows
+
+Stop6-3 Change directory to the 'windows' folder in the LIBSVM folder 
+
+Step6-4 Run the following command on CMD
 ```
 svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_trainingDataSet.scale
 ```
-Step2 Run the following command on CMD
+Step6-5 Run the following command on CMD
 ```
 svm-train -s 0 -c 100 -g 0.1 -v 5 LIBSVM2020CLF_trainingDataSet.scale
 ```
@@ -92,13 +97,14 @@ Do five-fold cross validation for the classifier using
 the parameters C = 100 and gamma = 0.1
 
 
-Step3 A model file (.model) file will be created.
+Step6-6 A model file (.model) file will be created.
 e.g.,
 LIBSVM2020CLF_trainingDataSet.scale.model
 
-
+Step6-7
 After finishing training, please put the model file (.model) in the 
 "TrainedModel\LIBSVM_Model" folder.
+
 
 **Step 7, Open another terminal to execute the stock prediction for
 tomorrow and get the prediction result(this should be done after today’s
