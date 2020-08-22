@@ -371,8 +371,10 @@ def buildTestingDataSet():
           
         #restart timer again to at 16:30 the next day 
         #/#
+        '''
         everyDayExecuter = Timer(secs, buildTestingDataSet)
         everyDayExecuter.start()
+        '''
     
 
 
