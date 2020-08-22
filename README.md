@@ -78,6 +78,18 @@ LIBSVM.**
 Refer to the manual of
 [*LIBSVM*](https://www.csie.ntu.edu.tw/~cjlin/libsvm/).
 
+e.g.,
+Step0 Open CMD on Windows
+Step1 Run the following command on CMD
+```
+svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_trainingDataSet.scale
+```
+Step2 Run the following command on CMD
+```
+svm-train -s 0 -c 100 -g 0.1 -v 5 LIBSVM2020CLF_trainingDataSet.scale
+```
+
+
 After finishing training, please put the model file (.model) in the 
 "TrainedModel\LIBSVM_Model" folder.
 
