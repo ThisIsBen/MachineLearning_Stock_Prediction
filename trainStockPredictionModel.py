@@ -43,6 +43,12 @@ def train_RF_CLF_Model(stock_id):
     #train the stock prediction model
     #load historical stock training data
     trainingDataframe = pandas.read_csv(trainingDataFilePath)
+
+    #The training data has mixed values e.g.,'1,123,332.32',13
+    #As a result, we remove ',' from training data e.g.,'1,123,332.32' and convert string to float
+    trainingDataframe=trainingDataframe.replace(',', '',regex=True)
+    trainingDataframe=trainingDataframe.astype(float)
+    
     trainingArray = trainingDataframe.values
     X = trainingArray[:,0:totalFeatureForOneRecord]
     Y = trainingArray[:,totalFeatureForOneRecord]
@@ -121,6 +127,12 @@ def train_Rise_Linear_RG_Model(stock_id):
     #train the stock prediction model
     #load historical stock training data
     trainingDataframe = pandas.read_csv(trainingDataFilePath)
+    
+    #The training data has mixed values e.g.,'1,123,332.32',13
+    #As a result, we remove ',' from training data e.g.,'1,123,332.32' and convert string to float
+    trainingDataframe=trainingDataframe.replace(',', '',regex=True)
+    trainingDataframe=trainingDataframe.astype(float)
+    
     trainingArray = trainingDataframe.values
     X = trainingArray[:,0:totalFeatureForOneRecord]
     Y = trainingArray[:,totalFeatureForOneRecord]
@@ -175,6 +187,12 @@ def  train_Fall_Linear_RG_Model(stock_id):
     #train the stock prediction model
     #load historical stock training data
     trainingDataframe = pandas.read_csv(trainingDataFilePath)
+    
+    #The training data has mixed values e.g.,'1,123,332.32',13
+    #As a result, we remove ',' from training data e.g.,'1,123,332.32' and convert string to float
+    trainingDataframe=trainingDataframe.replace(',', '',regex=True)
+    trainingDataframe=trainingDataframe.astype(float)
+    
     trainingArray = trainingDataframe.values
     X = trainingArray[:,0:totalFeatureForOneRecord]
     Y = trainingArray[:,totalFeatureForOneRecord]
