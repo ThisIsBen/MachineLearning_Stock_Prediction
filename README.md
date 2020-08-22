@@ -91,10 +91,10 @@ svm-scale -l -1 -u 1 -s range LIBSVM2020CLF_trainingDataSet.csv > LIBSVM2020CLF_
 ```
 Step6-5 Run the following command on CMD
 ```
-svm-train -s 0 -c 100 -g 0.1 -v 5 LIBSVM2020CLF_trainingDataSet.scale
+svm-train -s 0 -c 5 -t 2 -g 0.5 -e 0.1 LIBSVM2020CLF_trainingDataSet.scale
 ```
-Do five-fold cross validation for the classifier using
-the parameters C = 100 and gamma = 0.1
+Train a classifier with RBF kernel exp(-0.5|u-v|^2), C=10, and
+stopping tolerance 0.1.
 
 
 Step6-6 A model file (.model) file will be created.
