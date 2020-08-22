@@ -30,6 +30,12 @@ def loadTestingDataSet(todayDate,stock_id):
     #load today's feature day to predict today's stock rise or fall
     testingDataFilePath='./ParsedStock/TestingDataSet/'+str(stock_id)+'_testingDataSet/'+todayDate+'.csv'
     testingDataframe = pandas.read_csv(testingDataFilePath)
+    
+    #The testing data has mixed values e.g.,'1,123,332.32',13
+    #As a result, we remove ',' from testing data e.g.,'1,123,332.32' and convert string to float
+    testingDataframe=testingDataframe.replace(',', '',regex=True)
+    testingDataframe=testingDataframe.astype(float)
+    
     testingDataSet= testingDataframe.values
     print("testingDataSet data of today\'s "+stock_id+": {}".format( testingDataSet))
     
@@ -145,6 +151,10 @@ def main():
         endDate=sys.argv[2]
 
         for stock_id in id_list:
+            
+            predictResultFolder="LIBSVMTestResult/"+stock_id+"_LIBSVMResult"
+            if not os.path.exists(predictResultFolder):
+                os.mkdir(predictResultFolder)
             
             #load testing data set
             testingDataSet,testingDataframe=loadTestingDataSet(startDate,stock_id)
