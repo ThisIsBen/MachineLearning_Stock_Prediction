@@ -88,6 +88,9 @@ Step2 Run the following command on CMD
 ```
 svm-train -s 0 -c 100 -g 0.1 -v 5 LIBSVM2020CLF_trainingDataSet.scale
 ```
+Step3 A model file (.model) file will be created.
+e.g.,
+LIBSVM2020CLF_trainingDataSet.scale.model
 
 
 After finishing training, please put the model file (.model) in the 
