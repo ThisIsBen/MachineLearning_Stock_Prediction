@@ -19,7 +19,7 @@ thisYear=2016
 #/#
 #year_list = range (2007,now.year+1) #since 2007 to this year
 #year_list = range (thisYear,now.year+1) #since 2007 to this year
-year_list = range (thisYear,now.year) #get 2016 data
+year_list = range (thisYear,now.year+1) #get 2016 data
 
 
 #/#
