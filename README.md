@@ -129,6 +129,13 @@ sh run.sh 2017-10-02 2017-10-02
 ```
 **Output Format:**
 The prediction result will be stored in JSON file in the "commit" folder with file name "[date]_[date].json"
+When the model prediction result is "buy":
+-close_high_price: The model predict that the price will surge until this point 
+-close_low_price: The point that the model suggest you to retreat
+
+When the model prediction result is "short":
+-close_low_price: The model predict that the price will plunge until this point 
+-close_high_price: The point that the model suggest you to retreat
 <img src="./media/image1.png" width="262" height="314" />
 
 ### Model 介紹:
