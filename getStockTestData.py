@@ -283,15 +283,20 @@ def setupTestingDataSetFormat(testingData):
     aRecordOfTrainingData=pandas.DataFrame()
 
     
+    dayCounter=feature_days
+    numOfTestingDataRow=testingData.shape[0]
     #setup features and label them with the data of the past feature_days days
-    for row_index in range( 0,feature_days):
+    for row_index in range( numOfTestingDataRow-feature_days,numOfTestingDataRow):
+       
         
         
         
         #get the stock data of the previous feature_days days and reset their index to merge them in the same row in later merge process.
         df_previousDay = testingData.iloc[[row_index]]
         df_previousDay=df_previousDay.reset_index(drop=True)
-        daysBefore=str(feature_days-row_index)
+        
+        daysBefore=str(dayCounter)
+        dayCounter=dayCounter-1
         
         #/#with 成交量
         #df_previousDay.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
