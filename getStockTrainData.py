@@ -274,7 +274,7 @@ def setupTrainingDataSetFormat(trainingData):
     
     
     
-    #get the number of records in trainingData
+     #get the number of records in trainingData
     numberOfRows=trainingData.shape[0]
     
     #create empty pandas dataframe as a container for classifier, rise regressor, and fall regressor usage
@@ -282,60 +282,39 @@ def setupTrainingDataSetFormat(trainingData):
     rgRiseTrainingDataSet = pandas.DataFrame()
     rgFallTrainingDataSet = pandas.DataFrame()
     
-  
+    
     #setup features and label them with the data of the past 3 days
     for row_index in range(0, numberOfRows-feature_days):
         
         #to generate column names e.g.,n天前開盤價
-        daysBefore=feature_days
+        row_indexShift=0
+        #clear the accumulator for feature_days stock data
+        #accumulate all the acquired stock data until feature_days
+        aRecordOfTrainingData= pandas.DataFrame()
         
-        
-        #get the stock data of the previous 3 days and reset their index to merge them in the same row in later merge process.
-        #由上而下 順序為 久到近
-        #if(df_previousDay1.loc[0,'收盤價']=='--'):
-        daysBefore=str(daysBefore) 
-        df_previousDay1 = trainingData.iloc[[row_index]]       
-        df_previousDay1=df_previousDay1.reset_index(drop=True)
-        
-        #/#with 成交量      
-        #df_previousDay1.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']      
-          
-         #/#without 成交量      
-        df_previousDay1.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
-
-        daysBefore=int(daysBefore)
-        daysBefore-=1
-        daysBefore=str(daysBefore)
-        df_previousDay2 = trainingData.iloc[[row_index+1]]
-        df_previousDay2=df_previousDay2.reset_index(drop=True)
-        
-        #/# with 成交量 
-        #df_previousDay2.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
-         
-        #/#without 成交量      
-        df_previousDay2.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
-        
-        
-        daysBefore=int(daysBefore)
-        daysBefore-=1
-        daysBefore=str(daysBefore)
-        df_previousDay3 = trainingData.iloc[[row_index+2]]
-        df_previousDay3=df_previousDay3.reset_index(drop=True) 
-        
-        #/# with 成交量 
-        #df_previousDay3.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']        
-         
-         #/#without 成交量 
-        df_previousDay3.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
-        
-        ######code modification area
-        # if more past days' data is required, add more  df_previousDay3 = pd.DataFrame(trainingData.iloc[row_index+n]) below 
-        ######code modification area
-        
-        
-        
-        aRecordOfTrainingData=pandas.concat([df_previousDay1,df_previousDay2,df_previousDay3], axis=1)
+        for daysBefore in range(feature_days, 0, -1):
+            #get the stock data of the previous 3 days and reset their index to merge them in the same row in later merge process.
+            #由上而下 順序為 久到近
+            #if(df_previousDay1.loc[0,'收盤價']=='--'):
+            daysBefore=str(daysBefore) 
+            df_previousDay = trainingData.iloc[[row_index+row_indexShift]]       
+            df_previousDay=df_previousDay.reset_index(drop=True)
+            
+            #to get next day's stock data
+            row_indexShift+=1
+            #/#with 成交量      
+            #df_previousDay1.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']      
+              
+             #/#without 成交量      
+            df_previousDay.columns = [daysBefore+u'天前開盤指數',daysBefore+u'天前最高指數',daysBefore+u'天前最低指數',daysBefore+u'天前收盤指數',daysBefore+u'天前成交股數',daysBefore+u'天前成交金額',daysBefore+u'天前成交筆數',daysBefore+u'天前漲跌點數']
+           
+            #accumulate all the acquired stock data until feature_days
+            aRecordOfTrainingData=pandas.concat([aRecordOfTrainingData,df_previousDay], axis=1)
    
+        
+        
+        
+       
         
         #label the current training data record
         
@@ -343,12 +322,12 @@ def setupTrainingDataSetFormat(trainingData):
         aRecordOfTrainingData['RiseOrFall']=0
         
         #avoid strange str that can't be converted to float
-        if(trainingData.loc[row_index+feature_days,'漲跌價差']=='X0.00'):
-            trainingData.loc[row_index+feature_days,'漲跌價差']='0'
+        if(trainingData.loc[row_index+feature_days,'漲跌點數']=='X0.00'):
+            trainingData.loc[row_index+feature_days,'漲跌點數']='0'
         
         
         #label 1 if it's Boom
-        if(float(trainingData.loc[row_index+feature_days,'漲跌價差'])>0 ):
+        if(float(trainingData.loc[row_index+feature_days,'漲跌點數'])>0 ):
             aRecordOfTrainingData['RiseOrFall']=1
 
         #add a record of feature and label to clf trainingDataSet  
@@ -357,7 +336,7 @@ def setupTrainingDataSetFormat(trainingData):
         
        
         #label the value with Price Fluctuation Limit.
-        priceFluctuationLimit=float(trainingData.loc[row_index+feature_days,'漲跌價差'])
+        priceFluctuationLimit=float(trainingData.loc[row_index+feature_days,'漲跌點數'])
         aRecordOfTrainingData['RiseOrFall']=priceFluctuationLimit
         
         
