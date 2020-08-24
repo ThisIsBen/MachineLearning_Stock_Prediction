@@ -27,8 +27,18 @@ feature_days=3
 
 
 
-#/#without 成交量
-list_colName=[u'3天前開盤價',u'3天前最高價',u'3天前最低價',u'3天前收盤價',u'3天前漲跌價差',u'3天前投信',u'3天前自營商',u'3天前外資',u'2天前開盤價',u'2天前最高價',u'2天前最低價',u'2天前收盤價',u'2天前漲跌價差',u'2天前投信',u'2天前自營商',u'2天前外資',u'1天前開盤價',u'1天前最高價',u'1天前最低價',u'1天前收盤價',u'1天前漲跌價差',u'1天前投信',u'1天前自營商',u'1天前外資']
+list_colName=[]
+for daysBefore in range (feature_days,0,-1):
+    daysBefore=str(daysBefore)
+    list_colName.append(daysBefore+u'天前開盤價')
+    list_colName.append(daysBefore+u'天前最高價')
+    list_colName.append(daysBefore+u'天前最低價')
+    list_colName.append(daysBefore+u'天前收盤價')
+    list_colName.append(daysBefore+u'天前漲跌價差')
+    list_colName.append(daysBefore+u'天前投信')
+    list_colName.append(daysBefore+u'天前自營商')
+    list_colName.append(daysBefore+u'天前外資')
+
 ######parameter area
 
 #set this program be executed automatically at 17:00 every day
