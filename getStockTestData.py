@@ -5,19 +5,21 @@ import json
 import csv
 import time,datetime,os,shutil
 from bs4 import BeautifulSoup
-import pandas
+import pandas as pd
 import sys
 from threading import Timer
 
 
 ######parameter area
 #id_list = ['2303','2330','1234','3006','2412'] #inout the stock IDs
-id_list = ['2317','2330','2885'] 
+startYear=2020
+now = datetime.datetime.now()
+year_list = range (startYear,now.year+1)
 
 
 
 #use the past 3 days' data to predict next day's stock
-feature_days=3
+feature_days=5
     
 #without 'RiseOrFall'
 
@@ -27,17 +29,19 @@ feature_days=3
 
 
 
+#/#without 成交量
+
 list_colName=[]
 for daysBefore in range (feature_days,0,-1):
     daysBefore=str(daysBefore)
-    list_colName.append(daysBefore+u'天前開盤價')
-    list_colName.append(daysBefore+u'天前最高價')
-    list_colName.append(daysBefore+u'天前最低價')
-    list_colName.append(daysBefore+u'天前收盤價')
-    list_colName.append(daysBefore+u'天前漲跌價差')
-    list_colName.append(daysBefore+u'天前投信')
-    list_colName.append(daysBefore+u'天前自營商')
-    list_colName.append(daysBefore+u'天前外資')
+    list_colName.append(daysBefore+u'天前開盤指數')
+    list_colName.append(daysBefore+u'天前最高指數')
+    list_colName.append(daysBefore+u'天前最低指數')
+    list_colName.append(daysBefore+u'天前收盤指數')
+    list_colName.append(daysBefore+u'天前成交股數')
+    list_colName.append(daysBefore+u'天前成交金額')
+    list_colName.append(daysBefore+u'天前成交筆數')
+    list_colName.append(daysBefore+u'天前漲跌點數')
 
 ######parameter area
 
@@ -59,53 +63,73 @@ secs=delta_t.seconds+1
 
 #standard web crawing process
 def get_webmsg ( stock_id,thisYear,thisMonth):
-        firstMonth=True
-        accumulate_dict = {}
+    highLow_firstMonth=True
+    volumne_firstMonth=True
+    highLow_accumulate_dict = {}
+    volumne_accumulate_dict = {}
    
-        date = thisYear + "{0:0=2d}".format(thisMonth) +'01' ## format is yyyymmdd
-        sid = str(stock_id)
-        url_twse = 'http://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date='+date+'&stockNo='+sid
-        #print(url_twse)
-        res =requests.post(url_twse,)
-        soup = BeautifulSoup(res.text , 'html.parser')
-        #print(soup.text)
-        smt = json.loads(soup.text)     #convert data into json
-        #print(smt)
-        if(firstMonth):
-            accumulate_dict.update(smt)
-            firstMonth=False
-        #print(accumulate_dict)
-        else:
-            accumulate_dict['data'].extend(smt['data'])
-    
-    
-        return accumulate_dict
-
-
-
-
-def write_csv(stock_id,directory,filename,smt,IsFirSecDay=False) :
-    writefile = directory + filename               #set output file name
-    #outputFile = open(writefile,'w',newline='')
-    outputFile = open(writefile,'a',newline='')#append to the file
-    outputWriter = csv.writer(outputFile)
-    '''
-    head = ''.join(smt['title'].split())
-    a = [head,""]
-    outputWriter.writerow(a)
-    '''
+    date = thisYear + "{0:0=2d}".format(thisMonth) +'01' ## format is yyyymmdd
+    #get 發行量加權股價指數歷史資料
+    url_twse = 'https://www.twse.com.tw/indicesReport/MI_5MINS_HIST?response=json&date='+date
+    res =requests.post(url_twse,)
+    soup = BeautifulSoup(res.text , 'html.parser')
+    #print(soup.text)
+    smt = json.loads(soup.text)     #convert data into json
     #print(smt)
-    #if today is the first or the second day on a month
-    if(IsFirSecDay==False):
-        outputWriter.writerow(smt['fields']) #write header 
-        
+    if(highLow_firstMonth):
+        highLow_accumulate_dict.update(smt)
+        highLow_firstMonth=False
+    #print(accumulate_dict)
+    else:
+        highLow_accumulate_dict['data'].extend(smt['data'])
     
-    for data in (smt['data']):
-        outputWriter.writerow(data)
+    
+    #get 市場成交資訊
+    url_twse = 'https://www.twse.com.tw/exchangeReport/FMTQIK?response=json&date='+date
+    res =requests.post(url_twse,)
+    soup = BeautifulSoup(res.text , 'html.parser')
+    #print(soup.text)
+    smt = json.loads(soup.text)     #convert data into json
+    #print(smt)
+    if(volumne_firstMonth):
+        volumne_accumulate_dict.update(smt)
+        volumne_firstMonth=False
+    #print(accumulate_dict)
+    else:
+        volumne_accumulate_dict['data'].extend(smt['data'])
+        
+    return highLow_accumulate_dict, volumne_accumulate_dict
 
-    outputFile.close()
 
 
+
+def write_csv(stock_id,directory,filename,highLow_accumulate_dict,volume_accumulate_dict,IsFirSecDay=False) :
+    
+    writefile = directory + filename
+    df_stockHighLow = pd.DataFrame(highLow_accumulate_dict['data'], columns =highLow_accumulate_dict['fields']) #convert data from dict to pandas dataframe
+    df_stockVolume = pd.DataFrame(volume_accumulate_dict['data'], columns =volume_accumulate_dict['fields'])  #convert data from dict to pandas dataframe
+    
+    
+    df_stockHighLow = pd.DataFrame(highLow_accumulate_dict['data'], columns =highLow_accumulate_dict['fields']) #convert data from dict to pandas dataframe
+    df_stockVolume = pd.DataFrame(volume_accumulate_dict['data'], columns =volume_accumulate_dict['fields'])  #convert data from dict to pandas dataframe
+    
+    
+    df_stockHighLow=df_stockHighLow.drop('日期',axis=1)
+    df_stockVolume=df_stockVolume.drop('日期',axis=1)
+    df_stockVolume=df_stockVolume.drop('發行量加權股價指數',axis=1)
+    #combine df_stockHighLow and df_stockVolume
+    df_combinedStockData = pd.concat([df_stockHighLow, df_stockVolume], axis=1, sort=False)
+    
+    #if today is not the first or the second day on a month
+    if(IsFirSecDay==False):
+        #write header 
+        df_combinedStockData.to_csv(writefile, index=False, encoding='utf-8')
+        
+        
+    else:
+        #do not write header
+         df_combinedStockData.to_csv(writefile, index=False,header=None, encoding='utf-8')
+  
 
 
 #create a directory in the current one doesn't exist
@@ -136,7 +160,7 @@ def makedirs (stock_id):
 
 def getStockData(thisYear,thisMonth,today):
 
-    for stock_id in id_list:
+    for stock_id in year_list:
         #for year in year_list:
             #for month in month_list:
                 #if (dt.year == year and month > dt.month) :break  # break loop while month over current month
@@ -151,39 +175,51 @@ def getStockData(thisYear,thisMonth,today):
                 IsFirSecDay=True
                 #if today is the first or the second day on a month
                 if(today=='1' or today=='2'):
-                    accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth-1)           #put the data into smt 
-                    #print(accumulate_dict)
+                    
+                    #get the stock data from last month
+                    lastMonth_highLow_accumulate_dict,lastMonth_volume_accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth-1)           #put the data into smt 
+                    
                     makedirs (stock_id)                  #create directory function
-                    write_csv (stock_id,directory, filename, accumulate_dict)    # write files into CSV
+                   
                     time.sleep(1)
                     
                     
-                    #general date situation    
-                    accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
-                    #print(accumulate_dict)         
-                    write_csv (stock_id,directory, filename, accumulate_dict,IsFirSecDay)    # write files into CSV
+                    #get the stock data of this month  
+                    thisMonth_highLow_accumulate_dict,thisMonth_volume_accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
+                       
+                    #combine the stock data of this month and last month
+                    lastMonth_highLow_accumulate_dict['data'] = lastMonth_highLow_accumulate_dict['data']+thisMonth_highLow_accumulate_dict['data']
+                    lastMonth_volume_accumulate_dict['data'] = lastMonth_volume_accumulate_dict['data']+thisMonth_volume_accumulate_dict['data']
+                    
+                    write_csv (stock_id,directory, filename, lastMonth_highLow_accumulate_dict,lastMonth_volume_accumulate_dict,IsFirSecDay)    # write files into CSV
                     time.sleep(1)  
                     
                 #Jan 1 and Jan 2
                 elif((today=='1' or today=='2') and str(thisMonth)=='1'):
-                    accumulate_dict = get_webmsg(stock_id,int(thisYear)-1,12)           #put the data into smt 
-                    #print(accumulate_dict)
+                    
+                    #get the stock data from last month
+                    lastMonth_highLow_accumulate_dict,lastMonth_volume_accumulate_dict = get_webmsg(stock_id,int(thisYear)-1,12)           #put the data into smt 
+                    
                     makedirs (stock_id)                  #create directory function
-                    write_csv (stock_id,directory, filename, accumulate_dict)    # write files into CSV
+                    
                     time.sleep(1)
                     
                     
-                    #general date situation    
-                    accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
-                    #print(accumulate_dict)         
-                    write_csv (stock_id,directory, filename, accumulate_dict,IsFirSecDay)    # write files into CSV
+                    #get the stock data of this month      
+                    thisMonth_highLow_accumulate_dict,thisMonth_volume_accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
+                    
+                    #combine the stock data of this month and last month
+                    lastMonth_highLow_accumulate_dict['data'] = lastMonth_highLow_accumulate_dict['data']+thisMonth_highLow_accumulate_dict['data']
+                    lastMonth_volume_accumulate_dict['data'] = lastMonth_volume_accumulate_dict['data']+thisMonth_volume_accumulate_dict['data']
+                            
+                    write_csv (stock_id,directory, filename, lastMonth_highLow_accumulate_dict,lastMonth_volume_accumulate_dict,IsFirSecDay)    # write files into CSV
                     time.sleep(1) 
                 else:    
                     #general date situation    
-                    accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
+                    highLow_accumulate_dict,volume_accumulate_dict = get_webmsg(stock_id,thisYear,thisMonth)           #put the data into smt 
                     #print(accumulate_dict)
                     makedirs (stock_id) 
-                    write_csv (stock_id,directory, filename, accumulate_dict)    # write files into CSV
+                    write_csv (stock_id,directory, filename, highLow_accumulate_dict,volume_accumulate_dict)    # write files into CSV
                     time.sleep(1)    
 
                 
@@ -209,12 +245,12 @@ def getStockData(thisYear,thisMonth,today):
 def setFeatureData(stock_id,thisYear,thisMonth,today):
    
            
-            
+            '''
             juristicYear=str(int(thisYear)-1911)
 
             url= 'https://stock.wearn.com/netbuy.asp?Year='+juristicYear+'&month='+"{0:0=2d}".format(thisMonth)+'&kind='+str(stock_id)
             #print(url)
-            dfs=pandas.read_html(url)
+            dfs=pd.read_html(url)
             juristicPerson=dfs[0]
 
             juristicPerson=juristicPerson.iloc[:,1:]
@@ -234,7 +270,7 @@ def setFeatureData(stock_id,thisYear,thisMonth,today):
             juristicPerson=juristicPerson.tail(feature_days)
             juristicPerson=juristicPerson.reset_index(drop=True)
             #print(juristicPerson)
-            
+            '''
 
 
             # read stock data of the current iterated company 
@@ -244,8 +280,8 @@ def setFeatureData(stock_id,thisYear,thisMonth,today):
 
             if os.path.isfile(stockDataFilePath):
                 # read stock data of the current iterated company 
-                stockData = pandas.read_csv(stockDataFilePath)
-
+                stockData = pd.read_csv(stockDataFilePath)
+                '''
                 #/#with 成交量
                 #stockData=stockData.iloc[:,2:9]
                 
@@ -257,11 +293,13 @@ def setFeatureData(stock_id,thisYear,thisMonth,today):
                 stockData=stockData.reset_index(drop=True)
                 #print(stockData)
 
-                featureData = pandas.concat([stockData,juristicPerson ], axis=1)
+                featureData = pd.concat([stockData,juristicPerson ], axis=1)
                 
                 #print(featureData)
                 #send featureData back to main function
-                return featureData     
+                return featureData  
+                '''
+                return stockData 
             
             else:
                 raise ValueError("%s isn't a file!" % stockDataFilePath)
@@ -287,17 +325,16 @@ def setupTestingDataSetFormat(testingData):
     
    
     #create empty pandas dataframe as a container for testing data set
-    testingDataSet = pandas.DataFrame()
+    testingDataSet = pd.DataFrame()
   
     #declare an empty pandas container as container
-    aRecordOfTrainingData=pandas.DataFrame()
-
+    aRecordOfTrainingData=pd.DataFrame()
     
     dayCounter=feature_days
     numOfTestingDataRow=testingData.shape[0]
+    print(numOfTestingDataRow)
     #setup features and label them with the data of the past feature_days days
     for row_index in range( numOfTestingDataRow-feature_days,numOfTestingDataRow):
-       
         
         
         
@@ -305,16 +342,17 @@ def setupTestingDataSetFormat(testingData):
         df_previousDay = testingData.iloc[[row_index]]
         df_previousDay=df_previousDay.reset_index(drop=True)
         
+       
         daysBefore=str(dayCounter)
         dayCounter=dayCounter-1
-        
         #/#with 成交量
         #df_previousDay.columns = [daysBefore+u'天前成交金額',daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前成交筆數',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
         
          #/#without 成交量
-        df_previousDay.columns = [daysBefore+u'天前開盤價',daysBefore+u'天前最高價',daysBefore+u'天前最低價',daysBefore+u'天前收盤價',daysBefore+u'天前漲跌價差',daysBefore+u'天前投信',daysBefore+u'天前自營商',daysBefore+u'天前外資']
+        
+        df_previousDay.columns = [daysBefore+u'天前開盤指數',daysBefore+u'天前最高指數',daysBefore+u'天前最低指數',daysBefore+u'天前收盤指數',daysBefore+u'天前成交股數',daysBefore+u'天前成交金額',daysBefore+u'天前成交筆數',daysBefore+u'天前漲跌點數']
 
-        testingDataSet=pandas.concat([testingDataSet,df_previousDay], axis=1)
+        testingDataSet=pd.concat([testingDataSet,df_previousDay], axis=1)
    
         
         
@@ -345,7 +383,7 @@ def writeSVMFormat2Csv(DataFrame,stock_id,testingDataFilename):
     if not os.path.exists(testingDataDirectory):
         os.makedirs(testingDataDirectory)
     #store training data set to csv
-    DataFrame.to_csv(testingDataDirectory+'/'+str(stock_id)+'_'+testingDataFilename+'.csv', index=False, sep=" ",header=False)
+    DataFrame.to_csv(testingDataDirectory+'/'+str(stock_id)+'_'+testingDataFilename+'.csv', index=False, sep=" ",header=False, encoding='utf-8')
 
 def buildTestingDataSet():
         #update date time info every day
@@ -363,17 +401,18 @@ def buildTestingDataSet():
         #get stock data and store it as csv 
         getStockData(thisYear,thisMonth,today)
 
-
-        for stock_id in id_list:
+        
+        for year in year_list:
+            
             #setup all the features
-            featureData=setFeatureData(stock_id,thisYear,thisMonth,today)
+            featureData=setFeatureData(year,thisYear,thisMonth,today)
 
 
             #setup testing data set
             testingDataSet=setupTestingDataSetFormat(featureData)
 
             #write pandas dataframe to csv file for clf usage 
-            writeTestingDataSet2csv(testingDataSet,stock_id,testingDataFilename)
+            writeTestingDataSet2csv(testingDataSet,year,testingDataFilename)
             
             
             
@@ -382,28 +421,29 @@ def buildTestingDataSet():
             testingDataSet=rearrange2SVMFormat(testingDataSet)
             
             #write to csv and replace comma with space
-            writeSVMFormat2Csv(testingDataSet,stock_id,testingDataFilename)
-          
+            writeSVMFormat2Csv(testingDataSet,year,testingDataFilename)
+        
+        
+        
         #restart timer again to at 16:30 the next day 
         #/#
         '''
         everyDayExecuter = Timer(secs, buildTestingDataSet)
         everyDayExecuter.start()
         '''
-    
 
 
 def main():
     #/#manually execution
-    #buildTestingDataSet()
+    buildTestingDataSet()
      
  
     
     
     #start the timer to run program at 16:30 every day,after it stops, restart it in the buildTestingDataSet function
-    #/#
-    everyDayExecuter = Timer(secs, buildTestingDataSet)#A threading.Timer executes a function once. 
-    everyDayExecuter.start()
+    #/
+    #everyDayExecuter = Timer(secs, buildTestingDataSet)#A threading.Timer executes a function once. 
+    #everyDayExecuter.start()
      
     
 if __name__ == "__main__":
